@@ -16,7 +16,7 @@ Steps:
     bash
     sh build_all.sh
     ```
-    This will build the images (**it will take a while !!!**:
+    This will build the images (**it will take a while !!!)**:
     -  *'ewsconsulting/ubuntu_python'*
     -  *'ewsconsulting/nb_py2'*
     -  *'ewsconsulting/nb_py3'*
