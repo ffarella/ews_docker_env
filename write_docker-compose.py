@@ -3,8 +3,6 @@
 
 from __future__ import print_function
 import os
-import yaml
-import io
 import click
 import jinja2
 from dotenv import load_dotenv
@@ -30,17 +28,21 @@ template = templateEnv.get_template("docker-compose.jinja-yaml")
 @click.option('--postgres/--no-postgres', help='Add Postgresql', default=True)
 @click.option('--pgadmin/--no-pgadmin', help='Add pgadmin interace', default=True)
 @click.option('--mongo/--no-mongo', help='Add MongoDB', default=True)
-@click.option('--no_mount', help='Add Python 2 jupyter', is_flag=True)
+@click.option('--mongoexp/--no-mongoexp', help='Add MongoDB Express', default=True)
+@click.option('--mount/--no-mount', help='Bind EWS drives', default=True)
 @click.option('--drives', help='Mounted drives (comma separated)', default="f,p,s,t")
-def main(no_mount, py2, py3, postgres, pgadmin, mongo, drives):
+def main(mount, py2, py3, postgres, pgadmin, mongo, mongoexp, drives):
     if not postgres:
         pgadmin = False
+    if not mongo:
+        mongoexp = False
     drives = drives.upper()
     allowed_drives = []
-    if no_mount: 
+    if mount:
         allowed_drives = [
             r"{}:/".format(c.upper()) for c in drives.split(',')
         ]
+
     res = []
     for root in allowed_drives:
         root_replace = "/ews_drives/" + root[0].lower()
@@ -68,7 +70,12 @@ def main(no_mount, py2, py3, postgres, pgadmin, mongo, drives):
             res.append(xy)
 
     output_text = template.render(
-        volumes=res, py2=py2, py3=py3, postgres=postgres, pgadmin=pgadmin, mongo=mongo, drives=drives)
+        volumes=res,
+        py2=py2, py3=py3,
+        postgres=postgres, pgadmin=pgadmin,
+        mongo=mongo, mongoexp=mongoexp,
+        drives=drives
+    )
     with open("docker-compose.yaml", "w") as fout:
         fout.write(output_text)
 
