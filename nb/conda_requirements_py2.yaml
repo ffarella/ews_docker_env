@@ -1,0 +1,266 @@
+name: base
+
+channels:
+  - menpo
+  - pyviz
+  - conda-forge 
+  - defaults
+
+dependencies:
+  - tini=0.18.0
+  - python=2.7.15
+  - nodejs=9.11.1
+  - blas=*=openblas
+  - numpy>=1.14.3
+  - pandas>=0.23.4 
+  - pandas-datareader
+  - numexpr
+  - sympy
+  - python-snappy
+  - blosc
+  - fastparquet
+  - pyarrow
+  - xarray
+  - pytables 
+  - scipy
+  - statsmodels
+  - patsy
+  - scikit-learn
+  - scikit-image
+  - cython
+  - numba
+
+  # Plotting stack
+  - matplotlib>=2.2.3
+  - altair>=2.2.*
+  - seaborn>=0.8.*
+  - dask
+  - dash
+  - plotly
+  - brewer2mpl
+  - folium 
+  - branca
+  - ggplot
+  - bqplot
+  - vincent
+  - vega
+  - sqlite
+
+  # holoviews stack
+  - bokeh=0.13.* 
+  - holoviews=1.10.* 
+  - geoviews=1.5.* 
+  - datashader=0.6.* 
+  - hvplot=0.2.*
+  - param=1.7.*
+  - paramnb=2.0.*
+  - parambokeh=0.2.*
+
+  # Database stack
+  - sqlalchemy>=1.2.* 
+  - sqlalchemy-utils>=0.33.* 
+  - psycopg2>=2.7.* 
+  - sqlite 
+  - pymongo 
+
+
+  # parallel stack
+  - cloudpickle
+  - distributed
+  - joblib
+  - futures 
+
+  # other stuff
+  - parse
+  - cycler
+  - yaml
+  - requests 
+  - pydot
+  - pydot-ng 
+  # - graphviz (apt-get)
+  - snakeviz 
+  - pycurl
+  - pyephem 
+  - pillow 
+
+  # Excel stack
+  - xlrd 
+  - xlsxwriter
+  - xlwt
+  
+  # GIS stack
+  - mercantile 
+  - gdal>=2.2.4 
+  - libgdal>=2.2.4
+  - shapely>=1.6.* 
+  - fiona>=1.7.* 
+  - rasterio>=1.0.* 
+  - geopandas>=0.4.* 
+  - h5py 
+  - libtiff 
+  - netcdf4 
+  - owslib 
+  - pyepsg 
+  - pykml 
+  - simplekml 
+  - pyshp 
+  - utm 
+  - cartopy
+  - geojson 
+  - geojsonio 
+  - osmnx 
+
+
+  # IPython/Jupyter stack
+  - sqlite 
+  - notebook=5.6.* 
+  - jupyterlab=0.33.*
+  - ipywidgets=7.4.* 
+  - ipyleaflet=0.9.* 
+  - ipyparallel=6.2.* 
+  - jupyter_contrib_nbextensions=0.5.* 
+  - jupyter_nbextensions_configurator=0.4.* 
+
+
+  # Flask stack
+  - click
+  - invoke
+  - colorlog
+  - apispec=0.38.0 
+  - werkzeug
+  - marshmallow=3.0.* 
+  - marshmallow-sqlalchemy 
+  - itsdangerous
+  - jinja2
+  
+  # Machine learning stack
+  # - mkl-service
+  - keras=2.2.0
+  - theano=1.0.2
+  - tensorflow=1.5.0
+  - xgboost
+  - py-xgboost
+
+  # Linting
+  - flake8
+  - autopep8
+  - pep8 
+  - pylint 
+  - pydocstyle 
+
+
+  # Other stuff
+  - intake::intake 
+  - intake::intake-parquet 
+  - intake::intake-xarray 
+  - intake::intake-mongo
+
+  # Deployement
+  - celery
+  - gevent
+  - uwsgi
+  - gunicorn
+
+  # VTK stack
+  - mayavi
+  - vtk>=7.0.0
+
+  
+  - pip:
+    - mongoengine
+    - pymodm
+    - flask-mongoengine
+    - Flask-MongoAlchemy
+    - Flask-PyMongo
+
+    - django
+    - django-extensions  
+    - djangorestframework 
+    - djangorestframework-gis
+    - djangorestframework-jwt
+    - djangorestframework-simplejwt 
+    - django-rest-framework
+    - django-cors-headers 
+    - django-rest-swagger
+    - django-model-utils
+    - django-redis
+    - django-socketio
+    - django-tables2
+    - django-filter
+    - django-crispy-forms
+    - django-extensions
+    - django-autocomplete-light
+    - django-reversion
+    - django-compressor
+    - django-debug-toolbar
+    - django-generic-scaffold
+    - pyecharts 
+    - echarts-countries-pypkg 
+    - cesiumpy
+
+    # Framework
+    - flask
+    - flask-mongorest
+    - flask-restless
+    - flask-restful
+    - flask-restplus
+    - flask-potion
+    # Framework
+    - flask-admin
+    # Authentication
+    - flask-principal
+    - flask-security
+    - flask-login
+    - flask-user
+    - flask-httpauth
+    - flask-oauthlib
+    - pyjwt 
+    - flask-jwt-extended 
+    # Database
+    - flask-mongoengine
+    - flask-sqlalchemy
+    - flask-migrate
+    # Session
+    - flask-session
+    # Caching
+    - flask-caching
+    - flask-cache
+    # Data validation
+    - flask-wtf
+    # Email
+    - flask-mail
+    # i18n
+    - flask-babel
+    - flask-babelex
+    # Full-text searching
+    - SQLAlchemy-Searchable
+    # Task Queue
+    - flask-rq
+    - celery
+    # Frontend
+    - flask-cors
+    - flask-assets
+    - flask-s3
+    - flask-sslify
+    - flask-htmlmin
+    # Development (Debugging/Testing/Documentation)
+    - flask-apispec
+    - flask-debugtoolbar
+    - flask-testing
+    # Utils
+    - flask-uploads
+    - flask-script
+    - flask-marshmallow
+    - flask-jsonrpc
+    - flask-bcrypt
+    - flask-socketio
+    - flask-moment
+    - flask-paginate
+
+    - windrose
+    - geomag
+    # - wmm2015 (python 3.6)
+    # - igrf12 (python 3.6)
+    - ecmwf-api-client
+    - git+http://github.com/FUSED-Wind/FUSED-Wake.git
+    - git+http://github.com/FUSED-Wind/windIO.git

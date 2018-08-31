@@ -1,0 +1,128 @@
+FROM ewsconsulting/ubuntu_python:latest
+
+
+LABEL python_version="3.6.6"
+
+USER root
+
+# EWS Python libraries
+ADD --chown=ewsuser:100 conda_requirements_py3.yaml /home/$NB_USER/conda_requirements_py3.yaml 
+RUN  fix-permissions /home/$NB_USER
+
+USER $NB_UID
+# Setup work directory for backward-compatibility
+RUN mkdir /home/$NB_USER/work && fix-permissions /home/$NB_USER
+
+# Install conda as ewsuser
+ENV MINICONDA_VERSION=4.5.4 \
+    NODE_OPTIONS=--max-old-space-size=4096
+
+RUN cd /tmp && \
+    wget --quiet https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
+    /bin/bash Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
+    rm Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
+    $CONDA_DIR/bin/conda config --system --prepend channels conda-forge && \
+    $CONDA_DIR/bin/conda config --system --set auto_update_conda false && \
+    $CONDA_DIR/bin/conda config --system --set show_channel_urls true && \
+    $CONDA_DIR/bin/conda install --quiet --yes conda="${MINICONDA_VERSION%.*}.*" && \
+    $CONDA_DIR/bin/conda update --all --quiet --yes && \
+    $CONDA_DIR/bin/conda clean -tipsy && \
+    rm -rf /home/$NB_USER/.cache/yarn && \
+    fix-permissions $CONDA_DIR && \
+    fix-permissions /home/$NB_USER
+
+
+# Install Jupyter Notebook, Lab
+# Generate a notebook server config
+# Cleanup temporary files
+# Correct permissions
+# Do all this in a single RUN command to avoid duplicating all of the
+# files across image layers when the permissions change
+
+RUN conda env update --quiet --file=/home/$NB_USER/conda_requirements_py3.yaml 2>&1 | tee $CONDA_DIR/installation_log.txt && \
+    conda list tini | grep tini | tr -s ' ' | cut -d ' ' -f 1,2 >> $CONDA_DIR/conda-meta/pinned && \
+    jupyter notebook --generate-config && \
+    jupyter nbextension enable --py widgetsnbextension --sys-prefix && \
+    jupyter nbextension enable codefolding/main --sys-prefix && \
+    jupyter nbextension enable collapsible_headings/main --sys-prefix && \
+    jupyter nbextension enable toc2/main --sys-prefix && \
+    jupyter nbextension enable highlighter/highlighter --sys-prefix && \
+    jupyter nbextension enable hide_input/main --sys-prefix && \
+    jupyter nbextension enable hide_header/main --sys-prefix && \
+    jupyter nbextension enable datestamper/main --sys-prefix && \
+    jupyter nbextension enable toggle_all_line_numbers/main --sys-prefix && \
+    jupyter nbextension enable autoscroll/main --sys-prefix && \
+    jupyter nbextension enable limit_output/main --sys-prefix && \
+    jupyter nbextension enable hide_header/main --sys-prefix && \
+    jupyter nbextension enable hide_input_all/main --sys-prefix && \
+    jupyter nbextension enable execute_time/ExecuteTime --sys-prefix && \
+    jupyter nbextension enable splitcell/splitcell --sys-prefix && \
+    jupyter nbextension enable zenmode/main --sys-prefix && \
+    jupyter nbextension enable spellchecker/main --sys-prefix && \
+    jupyter nbextension enable collapsible_headings/main --sys-prefix && \
+    jupyter nbextension enable varInspector/main --sys-prefix && \
+    jupyter nbextension enable move_selected_cells/main --sys-prefix && \
+    jupyter nbextension enable echarts/main --sys-prefix && \
+    jupyter nbextension enable echarts-countries-js/index --sys-prefix && \
+    jupyter labextension install @jupyterlab/hub-extension@^0.11.0 --no-build && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build && \
+    jupyter labextension install jupyter-leaflet --no-build && \
+    jupyter labextension install @pyviz/jupyterlab_pyviz --no-build && \
+    jupyter labextension install @jupyterlab/toc --no-build && \    
+    jupyter labextension install plotlywidget  --no-build && \
+    jupyter labextension install @jupyterlab/plotly-extension --no-build && \
+    jupyter labextension install @jupyterlab/geojson-extension --no-build && \
+    jupyter lab build && \
+    conda remove --quiet --yes --force qt pyqt && \
+    conda clean -tipsy && \
+    npm cache clean --force && \
+    rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
+    rm -rf /home/$NB_USER/.cache/yarn && \
+    rm -rf /home/$NB_USER/.node-gyp && \
+    rm -rf ~/.cache/pip && \
+    fix-permissions $CONDA_DIR && \
+    fix-permissions /home/$NB_USE
+
+# Check the installation
+
+ENV LIBGL_ALWAYS_INDIRECT=1 \
+    KERAS_BACKEND=tensorflow \
+    PYTHONPATH=/home/$NB_USER/ews_libs \
+    MKL_THREADING_LAYER=GNU \   
+    MPLBACKEND=Agg
+
+RUN fix-permissions $CONDA_DIR && \
+    fix-permissions /home/$NB_USER && \ 
+    MPLBACKEND=Agg python -c "import matplotlib.pyplot" && \
+    fix-permissions /home/$NB_USER && \
+    conda list --show-channel-urls > /home/$NB_USER/package-list.txt && \
+    conda list --export > /home/$NB_USER/requirements.txt
+
+USER root
+EXPOSE 8889
+WORKDIR $HOME
+
+# Configure container startup
+ENTRYPOINT ["tini", "-g", "--"]
+CMD ["start-notebook.sh"]
+
+# Add local files as late as possible to avoid cache busting
+COPY start.sh /usr/local/bin/
+COPY start-notebook.sh /usr/local/bin/
+COPY start-singleuser.sh /usr/local/bin/
+COPY jupyter_notebook_config.py /etc/jupyter/
+
+# Add EWS libraries
+ADD --chown=ewsuser:100 ./ews_libs /home/$NB_USER/ews_libs
+
+RUN ipcluster nbextension enable && fix-permissions /usr/local/
+RUN fix-permissions /etc/jupyter/
+RUN chown -R $NB_USER /home/$NB_USER
+RUN fix-permissions /home/$NB_USER
+RUN fix-permissions /home/$NB_USER/.ipython
+
+# Switch back to ewsuser to avoid accidental container runs as root
+# Switch back to ewsuser to avoid accidental container runs as root
+USER $NB_UID
+RUN KERAS_BACKEND=theano && echo $(python -c "from container_tests.test_installation import test; test()") && \
+    KERAS_BACKEND=tensorflow && echo $(python -c "from container_tests.test_installation import test; test()")

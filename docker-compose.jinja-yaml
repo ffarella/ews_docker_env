@@ -1,0 +1,145 @@
+version: '3.2'
+
+services:
+
+  {% if py2 %}
+  jupyter_py2:
+    hostname: jupyter_py2
+    image: ewsconsulting/nb_py2:latest
+    restart: always
+    networks:
+      {% if postgres -%}
+      - pg_network
+      {%- endif %}
+      {% if mongo -%}
+      - mongo_network
+      {%- endif %}
+    ports:
+      - 8888:8888
+    env_file: .env
+    entrypoint: start-notebook.sh --port=8888
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - EWS_DRIVES_PATH=${EWS_DRIVES_PATH} 
+      - EWS_DRIVES_PATH_SEPARATOR=${EWS_DRIVES_PATH_SEPARATOR} 
+      - MOUNTED_EWS_DRIVES={{ drives }}
+    volumes:
+      {% for src, dst in volumes -%}
+      - type: bind
+        source: {{ src }}
+        target: {{ dst }}
+      {% endfor %}
+    {% endif %} 
+
+  {% if py3 %}
+  jupyter_py3:
+    hostname: jupyter_py3
+    image: ewsconsulting/nb_py3:latest
+    restart: always
+    networks:
+      {% if postgres -%}
+      - pg_network
+      {%- endif %}
+      {% if mongo -%}
+      - mongo_network
+      {%- endif %}
+    ports:
+      - 8889:8889
+    entrypoint: start-notebook.sh --port=8889
+    env_file: .env
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - EWS_DRIVES_PATH=${EWS_DRIVES_PATH} 
+      - EWS_DRIVES_PATH_SEPARATOR=${EWS_DRIVES_PATH_SEPARATOR} 
+      - MOUNTED_EWS_DRIVES={{ drives }}
+    volumes:
+      {% for src, dst in volumes -%}
+      - type: bind
+        source: {{ src }}
+        target: {{ dst }}
+      {% endfor %}
+    {% endif %}    
+
+  {% if postgres %}
+  postgres_db:
+    hostname: postgres_db
+    image: timescale/timescaledb-postgis:0.11.0-pg10
+    restart: always
+    volumes:
+      - pgvolume:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - pg_network
+    ports:
+      - "5432:5432"
+  {% endif %}
+
+  {% if pgadmin %}
+  pgadmin4:
+    hostname: pgadmin4
+    image: crunchydata/crunchy-pgadmin4:centos7-10.5-2.1.0
+    volumes:
+      - pga4volume:/var/lib/pgadmin
+    env_file: .env
+    environment:
+      - PGADMIN_SETUP_EMAIL=${PGADMIN_SETUP_EMAIL}
+      - PGADMIN_SETUP_PASSWORD=${PGADMIN_SETUP_PASSWORD}
+      - SERVER_PORT=${SERVER_PORT}
+    networks:
+      - pg_network
+    ports:
+      - 5050:5050
+    depends_on:
+      - postgres_db
+  {% endif %}
+
+  {% if mongo %}
+  mongo_db:
+      image: mongo:4.0.1
+      container_name: mongodb
+      restart: always
+      env_file: .env
+      environment:
+        - MONGO_LOG_DIR=/dev/null
+        - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+        - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      volumes:
+        - mongovolume:/data/db
+      ports:
+          - 27017:27017
+      networks:
+      - mongo_network
+      command: mongod --smallfiles --logpath=/dev/null # --quiet
+    {% endif %}
+
+
+networks:
+  {% if postgres -%}
+  pg_network:
+    driver: bridge
+  {%- endif %}
+  {% if mongo -%}
+  mongo_network:
+    driver: bridge
+  {%- endif %}
+
+volumes:
+  {% if postgres -%}
+  pgvolume:
+  {%- endif %}
+  {% if pgadmin -%}
+  pga4volume:
+  {%- endif %}
+  {% if mongo -%}
+  mongovolume:
+  {%- endif %}
