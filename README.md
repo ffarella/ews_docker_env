@@ -6,8 +6,8 @@ Installation
 
 This assumes you already have a minimal developper enrionnemt installed.
 You need:
- - Docker
- - Python 2 or Python 3 (you might need to run ```pip install python-dotenv```)
+- Docker
+- Python 2 or Python 3 (you might need to run ```pip install python-dotenv```)
 
 Steps:
 1. Build the necessary notebook images:
@@ -64,7 +64,6 @@ Steps:
     EWS_DRIVES_PATH_SEPARATOR=_
     ```
 
-
 4. Build the docker-compose.yaml file and pull the necessary images:
     > open a terminal in this folder and run:
     ```bash
@@ -89,15 +88,15 @@ Steps:
         - ```--drives f,p,s,t``` *(this will mount the drives F:, P:, S: and T:)*<br>
 
 6. To kill the service, use:    ```docker-compose rm -f -s -v```
-    
+
 7. Setup ***pgAdmin4***:
     > Go in [pgAdmin4 web interface](http://192.168.1.88:5050/browser)
     > Log-in using the login and password you defined for:
      - $PGADMIN_SETUP_EMAIL
      - $PGADMIN_SETUP_PASSWORD
     > Create a new server connection:
-     - ```General/Name```: PG10 (or whatever) 
-     - ```Connection/Host name```: $POSTGRES_HOST 
+     - ```General/Name```: PG10 (or whatever)
+     - ```Connection/Host name```: $POSTGRES_HOST
      - ```Port```: 5432
      - ```Username```: $POSTGRES_USER
      - ```Password```: $POSTGRES_PASSWORD
@@ -111,7 +110,7 @@ Remove commands
 docker image rm ewsconsulting/ubuntu_python
 docker image rm ewsconsulting/nb_py2
 docker image rm ewsconsulting/nb_py3
-docker image rm mongo:4.0.1 
+docker image rm mongo:4.0.1
 docker image rm mongo-express:0.49.0
 docker image rm crunchydata/crunchy-pgadmin4:centos7-10.5-2.1.0 docker image rm docker image rm timescale/timescaledb-postgis:0.11.0-pg10
 docker image rm debian:jessie-slim
